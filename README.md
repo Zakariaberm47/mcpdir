@@ -54,10 +54,16 @@ Think of it as **npm for AI integrations**: a searchable directory where you can
 - Sort by stars, updated, or relevance
 
 ### Multi-Source Indexing
-- **MCP Registry** — Official protocol registry
-- **npm** — Node.js packages with `mcp` keyword
-- **GitHub** — Repositories with `mcp-server` topic
-- **PyPI** — Python packages _(coming soon)_
+
+We aggregate MCP servers from multiple sources to provide the most comprehensive directory:
+
+| Source | Description | Link |
+|:------:|:------------|:----:|
+| **MCP Registry** | Official Model Context Protocol registry | [registry.modelcontextprotocol.io](https://registry.modelcontextprotocol.io) |
+| **npm** | Node.js packages with `mcp` keyword | [npmjs.com](https://www.npmjs.com/search?q=keywords:mcp) |
+| **GitHub** | Repositories with `mcp-server` topic | [github.com/topics/mcp-server](https://github.com/topics/mcp-server) |
+| **Glama** | Curated MCP servers from Glama.ai | [glama.ai/mcp/servers](https://glama.ai/mcp/servers) |
+| **PyPI** | Python packages _(coming soon)_ | — |
 
 ### Server Validation
 - Docker-based validation for secure sandbox testing
@@ -251,10 +257,14 @@ We welcome contributions! Here's how to get started:
 
 ## Roadmap
 
+### Completed
+- [x] Multi-source indexing (MCP Registry, npm, GitHub, Glama)
+- [x] Server submission form with validation
+- [x] Admin dashboard with validation queue
+- [x] Auto-revalidation on version updates
+
 ### In Progress
 - [ ] PyPI source integration
-- [ ] Server submission form (authenticated)
-- [ ] Validation queue management UI
 
 ### Planned
 - [ ] Server comparison tool
