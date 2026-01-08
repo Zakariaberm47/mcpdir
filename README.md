@@ -6,14 +6,26 @@
 
 **Discover, validate, and integrate Model Context Protocol servers for AI applications**
 
-[Explore Servers](https://mcpdir.dev/servers) · [Browse Categories](https://mcpdir.dev/categories) · [Submit Server](https://mcpdir.dev/submit)
+<br />
 
----
+[🌐 **Live Demo** → mcpdir.dev](https://mcpdir.dev)
+
+<br />
 
 [![GitHub Stars](https://img.shields.io/github/stars/eL1fe/mcpdir?style=flat-square&logo=github&color=06b6d4)](https://github.com/eL1fe/mcpdir/stargazers)
 [![License](https://img.shields.io/badge/license-MIT-a855f7?style=flat-square)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-22c55e?style=flat-square)](CONTRIBUTING.md)
 [![Deploy](https://img.shields.io/badge/deploy-vercel-black?style=flat-square&logo=vercel)](https://vercel.com)
+
+<br />
+
+<a href="https://mcpdir.dev">
+  <img src="public/preview.gif" alt="MCP Hub Preview" width="800" />
+</a>
+
+<br />
+
+[Explore Servers](https://mcpdir.dev/servers) · [Browse Categories](https://mcpdir.dev/categories) · [Submit Server](https://mcpdir.dev/submit)
 
 </div>
 
