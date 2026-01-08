@@ -1,4 +1,5 @@
 import { SyncSource, DiscoveredServer, SyncSourceOptions, SyncBatch, normalizeGitHubUrl, parseGitHubUrl, delay } from "./base";
+import { jsonrepair } from "jsonrepair";
 
 const GLAMA_API_URL = "https://glama.ai/api/mcp/v1/servers";
 
@@ -51,30 +52,36 @@ export class GlamaSource extends SyncSource {
         throw new Error(`Glama API error: ${response.status}`);
       }
 
-      // Glama API sometimes returns invalid JSON (unescaped backslashes)
-      // Try to parse and skip pages with errors
+      // Glama API sometimes returns invalid JSON (unescaped backslashes, etc.)
+      // Use jsonrepair to fix common issues
       let data: GlamaResponse;
       const text = await response.text();
       try {
         data = JSON.parse(text);
         consecutiveErrors = 0;
       } catch {
-        console.warn(`  glama: skipping page with invalid JSON (cursor: ${cursor?.slice(0, 20)}...)`);
-        consecutiveErrors++;
+        try {
+          const repaired = jsonrepair(text);
+          data = JSON.parse(repaired);
+          consecutiveErrors = 0;
+        } catch (e) {
+          console.warn(`  glama: skipping page with unfixable JSON (cursor: ${cursor?.slice(0, 20)}...): ${e}`);
+          consecutiveErrors++;
 
-        if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
-          console.warn(`  glama: too many consecutive errors, stopping`);
+          if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
+            console.warn(`  glama: too many consecutive errors, stopping`);
+            return;
+          }
+
+          // Try to extract cursor from malformed response to continue
+          const cursorMatch = text.match(/"endCursor"\s*:\s*"([^"]+)"/);
+          if (cursorMatch) {
+            cursor = cursorMatch[1];
+            await delay(100);
+            continue;
+          }
           return;
         }
-
-        // Try to extract cursor from malformed response to continue
-        const cursorMatch = text.match(/"endCursor"\s*:\s*"([^"]+)"/);
-        if (cursorMatch) {
-          cursor = cursorMatch[1];
-          await delay(100);
-          continue;
-        }
-        return;
       }
       const servers: DiscoveredServer[] = [];
       let filtered = 0;
