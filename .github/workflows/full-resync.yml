@@ -1,0 +1,107 @@
+name: Full Resync
+
+on:
+  workflow_dispatch:
+    inputs:
+      skip_ai:
+        description: 'Skip AI parsing (faster but no tools extraction)'
+        default: false
+        type: boolean
+      skip_validate:
+        description: 'Skip validation step'
+        default: true
+        type: boolean
+      confirm:
+        description: 'Type "DELETE ALL" to confirm database truncation'
+        required: true
+        type: string
+
+jobs:
+  resync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180  # 3 hours max
+
+    steps:
+      - name: Verify confirmation
+        if: inputs.confirm != 'DELETE ALL'
+        run: |
+          echo "❌ Confirmation failed. You must type 'DELETE ALL' to proceed."
+          exit 1
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Step 1 - Truncate database
+        run: |
+          echo "🗑️ Truncating servers table..."
+          pnpm tsx -e "
+            const { neon } = require('@neondatabase/serverless');
+            const { drizzle } = require('drizzle-orm/neon-http');
+            const { sql } = require('drizzle-orm');
+
+            async function truncate() {
+              const sqlClient = neon(process.env.DATABASE_URL);
+              const db = drizzle(sqlClient);
+              await db.execute(sql\`TRUNCATE server_categories, server_tags, server_sources, manual_validations CASCADE\`);
+              await db.execute(sql\`TRUNCATE servers CASCADE\`);
+              console.log('✅ Truncated');
+            }
+            truncate();
+          "
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Step 2 - Sync from all sources
+        run: |
+          echo "📡 Syncing from all sources..."
+          if [ "${{ inputs.skip_ai }}" = "true" ]; then
+            SKIP_AI=true pnpm tsx scripts/sync-servers.ts --sources=all
+          else
+            pnpm tsx scripts/sync-servers.ts --sources=all
+          fi
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAT || github.token }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      - name: Step 3 - Enrich from Glama
+        run: |
+          echo "✨ Enriching from Glama..."
+          pnpm tsx scripts/enrich-from-glama.ts
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Step 4 - Validate popular servers
+        if: inputs.skip_validate == false
+        run: |
+          echo "🔍 Validating popular servers..."
+          pnpm tsx scripts/validate-servers.ts --popular
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Full Resync Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Step | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Truncate | ✅ |" >> $GITHUB_STEP_SUMMARY
+          echo "| Sync (AI: ${{ inputs.skip_ai && 'skipped' || 'enabled' }}) | ✅ |" >> $GITHUB_STEP_SUMMARY
+          echo "| Enrich Glama | ✅ |" >> $GITHUB_STEP_SUMMARY
+          echo "| Validate | ${{ inputs.skip_validate && '⏭️ skipped' || '✅' }} |" >> $GITHUB_STEP_SUMMARY
