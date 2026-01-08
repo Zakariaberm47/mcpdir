@@ -148,6 +148,21 @@ function slugify(name: string): string {
     .replace(/^-|-$/g, "");
 }
 
+function generateUniqueSlug(name: string, usedSlugs: Set<string>): string {
+  const baseSlug = slugify(name);
+  if (!usedSlugs.has(baseSlug)) {
+    usedSlugs.add(baseSlug);
+    return baseSlug;
+  }
+  let counter = 2;
+  while (usedSlugs.has(`${baseSlug}-${counter}`)) {
+    counter++;
+  }
+  const uniqueSlug = `${baseSlug}-${counter}`;
+  usedSlugs.add(uniqueSlug);
+  return uniqueSlug;
+}
+
 function getCategoriesFromTopics(topics: string[]): string[] {
   const cats = new Set<string>();
   for (const topic of topics) {
@@ -314,6 +329,7 @@ export async function syncServers(options: SyncOptions = {}): Promise<SyncResult
   const existingServers = await getDb()
     .select({
       id: servers.id,
+      slug: servers.slug,
       sourceUrl: servers.sourceUrl,
       contentHash: servers.contentHash,
       readmeContent: servers.readmeContent,
@@ -321,6 +337,7 @@ export async function syncServers(options: SyncOptions = {}): Promise<SyncResult
     })
     .from(servers);
   const existingByUrl = new Map(existingServers.map((s) => [s.sourceUrl, s]));
+  const usedSlugs = new Set(existingServers.map((s) => s.slug));
 
   // For retry mode, get URLs of servers that have README but empty tools
   const aiFailedUrls = new Set(
@@ -373,7 +390,9 @@ export async function syncServers(options: SyncOptions = {}): Promise<SyncResult
 
     if (!canonicalUrl) return;
 
-    const slug = slugify(serverName);
+    // Use existing slug for updates, generate unique slug for new servers
+    const existingServer = existingByUrl.get(canonicalUrl);
+    const slug = existingServer?.slug ?? generateUniqueSlug(serverName, usedSlugs);
 
     // Fetch GitHub data if we have owner/repo
     let githubData: GitHubRepo | null = null;
@@ -448,8 +467,7 @@ export async function syncServers(options: SyncOptions = {}): Promise<SyncResult
     const forksCount = mergedServer.forks ?? githubData?.forks_count ?? 0;
 
     try {
-      const existing = existingByUrl.get(canonicalUrl);
-      const isNew = !existing;
+      const isNew = !existingServer;
 
       // Upsert server
       const [inserted] = await getDb()
