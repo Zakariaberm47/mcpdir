@@ -18,6 +18,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "MCP Hub — The registry for Model Context Protocol servers",
   description: "Discover and explore MCP servers. The npm/Docker Hub for Model Context Protocol.",
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({
