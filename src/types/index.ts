@@ -3,7 +3,7 @@ import type { Server, Category, Tag, ServerSource } from "@/lib/db/schema";
 export type { Server, Category, Tag, ServerSource };
 
 // Extended types with relations
-export interface ServerWithRelations extends Omit<Server, 'githubRepoId' | 'npmDownloads' | 'npmQualityScore' | 'discoveredSources'> {
+export interface ServerWithRelations extends Omit<Server, 'githubRepoId' | 'npmDownloads' | 'npmQualityScore' | 'discoveredSources' | 'envConfigSchema'> {
   categories: string[];
   categoryNames?: string[];
   tags: string[];
@@ -13,6 +13,7 @@ export interface ServerWithRelations extends Omit<Server, 'githubRepoId' | 'npmD
   npmDownloads?: number | null;
   npmQualityScore?: string | null;
   discoveredSources?: string[] | null;
+  envConfigSchema?: Record<string, unknown> | null;
 }
 
 // API response types

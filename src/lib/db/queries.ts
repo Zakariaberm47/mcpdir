@@ -119,10 +119,16 @@ export async function getStats() {
     .from(servers)
     .where(eq(servers.status, "active"));
 
+  const [validatedCount] = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(servers)
+    .where(and(eq(servers.status, "active"), eq(servers.validationStatus, "validated")));
+
   return {
     servers: serverCount?.count ?? 0,
     categories: categoryCount?.count ?? 0,
     totalStars: totalStars?.sum ?? 0,
+    validated: validatedCount?.count ?? 0,
   };
 }
 

@@ -9,12 +9,23 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { GlassCard, GlassCardContent, GlassCardHeader, GlassCardTitle } from "@/components/ui/glass-card";
 
+interface EnvConfigSchema {
+  type?: string;
+  required?: string[];
+  properties?: Record<string, {
+    type?: string;
+    description?: string;
+    default?: string;
+  }>;
+}
+
 interface HelpValidateFormProps {
   serverId: string;
   serverName: string;
   packageName: string | null;
   existingInstallCommand: string | null;
   requiredEnvVars?: string[];
+  envConfigSchema?: EnvConfigSchema | null;
 }
 
 interface EnvVar {
@@ -28,7 +39,14 @@ export function HelpValidateForm({
   packageName,
   existingInstallCommand,
   requiredEnvVars = [],
+  envConfigSchema,
 }: HelpValidateFormProps) {
+  // Extract env vars from schema if available
+  const schemaEnvVars = envConfigSchema?.properties
+    ? Object.keys(envConfigSchema.properties)
+    : [];
+  const effectiveEnvVars = schemaEnvVars.length > 0 ? schemaEnvVars : requiredEnvVars;
+  const requiredKeys = new Set(envConfigSchema?.required || []);
   const { data: session, status } = useSession();
   const [step, setStep] = useState<"loading" | "form" | "credentials" | "running" | "success" | "failed">("loading");
   const [loading, setLoading] = useState(false);
@@ -45,8 +63,8 @@ export function HelpValidateForm({
   const [customCommand, setCustomCommand] = useState("");
   const [useCustomCommand, setUseCustomCommand] = useState(!existingInstallCommand);
   const [envVars, setEnvVars] = useState<EnvVar[]>(
-    requiredEnvVars.length > 0
-      ? requiredEnvVars.map((key) => ({ key, value: "" }))
+    effectiveEnvVars.length > 0
+      ? effectiveEnvVars.map((key) => ({ key, value: "" }))
       : [{ key: "", value: "" }]
   );
 
@@ -370,36 +388,56 @@ export function HelpValidateForm({
             </div>
           )}
 
-          <div className="space-y-2">
-            {envVars.map((env, index) => (
-              <div key={index} className="space-y-1">
-                <div className="flex gap-1">
-                  <Input
-                    placeholder="KEY"
-                    value={env.key}
-                    onChange={(e) => updateEnvVar(index, "key", e.target.value)}
-                    className="flex-1 bg-background/50 border-[var(--glass-border)] font-mono text-xs h-8"
-                  />
-                  {envVars.length > 1 && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeEnvVar(index)}
-                      className="shrink-0 h-8 w-8"
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
+          <div className="space-y-3">
+            {envVars.map((env, index) => {
+              const schemaInfo = envConfigSchema?.properties?.[env.key];
+              const isRequired = requiredKeys.has(env.key);
+              const isFromSchema = schemaEnvVars.includes(env.key);
+
+              return (
+                <div key={index} className="space-y-1">
+                  <div className="flex gap-1">
+                    <div className="flex-1">
+                      {isFromSchema ? (
+                        <div className="flex items-center gap-1.5 h-8 px-2 bg-background/30 border border-[var(--glass-border)] rounded-md">
+                          <code className="font-mono text-xs">{env.key}</code>
+                          {isRequired && <span className="text-red-400 text-xs">*</span>}
+                        </div>
+                      ) : (
+                        <Input
+                          placeholder="KEY"
+                          value={env.key}
+                          onChange={(e) => updateEnvVar(index, "key", e.target.value)}
+                          className="bg-background/50 border-[var(--glass-border)] font-mono text-xs h-8"
+                        />
+                      )}
+                    </div>
+                    {!isFromSchema && envVars.length > 1 && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeEnvVar(index)}
+                        className="shrink-0 h-8 w-8"
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    )}
+                  </div>
+                  {schemaInfo?.description && (
+                    <p className="text-[10px] text-muted-foreground/70 px-1">
+                      {schemaInfo.description}
+                    </p>
                   )}
+                  <Input
+                    type="password"
+                    placeholder={schemaInfo?.default ? `default: ${schemaInfo.default}` : "value"}
+                    value={env.value}
+                    onChange={(e) => updateEnvVar(index, "value", e.target.value)}
+                    className="w-full bg-background/50 border-[var(--glass-border)] text-xs h-8"
+                  />
                 </div>
-                <Input
-                  type="password"
-                  placeholder="value"
-                  value={env.value}
-                  onChange={(e) => updateEnvVar(index, "value", e.target.value)}
-                  className="w-full bg-background/50 border-[var(--glass-border)] text-xs h-8"
-                />
-              </div>
-            ))}
+              );
+            })}
 
             <Button
               variant="ghost"
@@ -408,13 +446,15 @@ export function HelpValidateForm({
               className="w-full text-xs text-muted-foreground hover:text-foreground h-7"
             >
               <Plus className="h-3 w-3 mr-1" />
-              Add
+              Add custom variable
             </Button>
           </div>
 
-          <p className="text-[10px] text-muted-foreground/60 mt-2">
-            e.g. OPENAI_API_KEY, ANTHROPIC_API_KEY
-          </p>
+          {!envConfigSchema?.properties && (
+            <p className="text-[10px] text-muted-foreground/60 mt-2">
+              e.g. OPENAI_API_KEY, ANTHROPIC_API_KEY
+            </p>
+          )}
 
           <div className="flex flex-col gap-2 mt-4">
             <Button

@@ -39,6 +39,7 @@ export const servers = pgTable("servers", {
   resources: jsonb("resources").$type<{ uri: string; name?: string; description?: string }[]>().default([]),
   prompts: jsonb("prompts").$type<{ name: string; description?: string }[]>().default([]),
   capabilities: jsonb("capabilities").$type<Record<string, boolean>>().default({}),
+  envConfigSchema: jsonb("env_config_schema").$type<Record<string, unknown> | null>(), // JSON Schema for required environment variables (from Glama)
 
   // GitHub metrics
   starsCount: integer("stars_count").default(0),

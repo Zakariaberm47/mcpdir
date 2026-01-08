@@ -4,6 +4,8 @@ import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 
+const ADMIN_GITHUB_USERNAMES = (process.env.ADMIN_GITHUB_USERNAMES ?? "").split(",").filter(Boolean);
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     GitHub({
@@ -59,7 +61,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         });
         if (dbUser) {
           token.userId = dbUser.id;
-          token.isAdmin = dbUser.isAdmin === 1;
+          token.isAdmin = dbUser.isAdmin === 1 || ADMIN_GITHUB_USERNAMES.includes(githubProfile.login);
+        } else {
+          token.isAdmin = ADMIN_GITHUB_USERNAMES.includes(githubProfile.login);
         }
       }
       return token;

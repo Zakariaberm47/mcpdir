@@ -1,0 +1,1 @@
+ALTER TABLE "servers" ADD COLUMN "env_config_schema" jsonb;

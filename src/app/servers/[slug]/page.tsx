@@ -358,6 +358,7 @@ export default async function ServerDetailPage({ params }: Props) {
               serverName={server.name}
               packageName={server.packageName}
               existingInstallCommand={server.installCommand}
+              envConfigSchema={server.envConfigSchema as Record<string, unknown> | null}
             />
           </div>
         )}

@@ -6,8 +6,9 @@ import { desc, eq, or } from "drizzle-orm";
 
 export async function GET(request: NextRequest) {
   const session = await auth();
+  const devBypass = process.env.NODE_ENV === "development" && process.env.DEV_ADMIN_BYPASS === "true";
 
-  if (!session?.user?.isAdmin) {
+  if (!devBypass && !session?.user?.isAdmin) {
     return NextResponse.json({ error: "Admin access required" }, { status: 403 });
   }
 

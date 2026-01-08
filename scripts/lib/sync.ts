@@ -42,6 +42,12 @@ const OFFICIAL_ORGS = ["modelcontextprotocol", "anthropics"];
 // Stars threshold for "popular" tag (verified is now set by validation process)
 const POPULAR_STARS_THRESHOLD = 500;
 
+// Global exclusions - repos that are NOT MCP servers (regardless of source)
+const GLOBALLY_EXCLUDED_URLS = new Set<string>([
+  // Add URLs here if needed, e.g.:
+  // "https://github.com/org/repo",
+]);
+
 export interface SyncOptions {
   sources?: SourceType[];
   skipAI?: boolean;
@@ -356,6 +362,13 @@ export async function syncServers(options: SyncOptions = {}): Promise<SyncResult
 
   for (const server of merged) {
     result.checked++;
+
+    // Global exclusion check (repos that are NOT MCP servers)
+    if (GLOBALLY_EXCLUDED_URLS.has(server.canonicalUrl)) {
+      result.skipped++;
+      continue;
+    }
+
     const existing = existingByUrl.get(server.canonicalUrl);
 
     // In retry mode, only process AI-failed servers
@@ -470,6 +483,10 @@ export async function syncServers(options: SyncOptions = {}): Promise<SyncResult
     try {
       const isNew = !existingServer;
 
+      // Extract env config schema from Glama if available
+      const glamaData = mergedServer.sourceData["glama"] as { environmentVariablesJsonSchema?: Record<string, unknown> } | undefined;
+      const envConfigSchema = glamaData?.environmentVariablesJsonSchema || null;
+
       // Upsert server
       const [inserted] = await getDb()
         .insert(servers)
@@ -489,6 +506,7 @@ export async function syncServers(options: SyncOptions = {}): Promise<SyncResult
           resources: aiData?.resources || [],
           prompts: aiData?.prompts || [],
           capabilities: {},
+          envConfigSchema,
           starsCount,
           forksCount,
           npmDownloads: mergedServer.npmDownloads,
@@ -510,6 +528,7 @@ export async function syncServers(options: SyncOptions = {}): Promise<SyncResult
             tools: aiData?.tools || [],
             resources: aiData?.resources || [],
             prompts: aiData?.prompts || [],
+            envConfigSchema,
             starsCount,
             forksCount,
             npmDownloads: mergedServer.npmDownloads,

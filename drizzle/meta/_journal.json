@@ -15,6 +15,13 @@
       "when": 1767907115841,
       "tag": "0001_military_firebird",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1767907708614,
+      "tag": "0002_high_thanos",
+      "breakpoints": true
     }
   ]
 }

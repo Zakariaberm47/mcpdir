@@ -13,6 +13,7 @@ import {
   Sparkles,
   Zap,
   Shield,
+  ShieldCheck,
   Box,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -134,13 +135,22 @@ export default async function HomePage() {
       {/* Stats Section */}
       <section className="py-16 border-y border-[var(--glass-border)]">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-3 gap-8 max-w-3xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
             <div className="text-center group">
               <div className="text-4xl md:text-5xl font-bold gradient-text mb-2">
                 <AnimatedCounter value={stats.servers} />
               </div>
               <div className="text-sm text-muted-foreground uppercase tracking-wider">
                 Servers
+              </div>
+            </div>
+            <div className="text-center group">
+              <div className="text-4xl md:text-5xl font-bold gradient-text mb-2 flex items-center justify-center gap-2">
+                <AnimatedCounter value={stats.validated} />
+                <ShieldCheck className="h-6 w-6 text-green-400" />
+              </div>
+              <div className="text-sm text-muted-foreground uppercase tracking-wider">
+                Validated
               </div>
             </div>
             <div className="text-center group">
