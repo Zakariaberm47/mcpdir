@@ -9,7 +9,7 @@ import { encryptCredentials } from "@/lib/encryption";
 // Trigger GitHub Actions workflow
 async function triggerGitHubActions(validationId: string): Promise<{ success: boolean; runId?: string; error?: string }> {
   const githubToken = process.env.GITHUB_TOKEN;
-  const repo = process.env.GITHUB_REPOSITORY || "mcpdir/mcpdir"; // owner/repo
+  const repo = process.env.GITHUB_REPOSITORY || "eL1fe/mcpdir"; // owner/repo
 
   if (!githubToken) {
     return { success: false, error: "GITHUB_TOKEN not configured" };
