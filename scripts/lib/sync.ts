@@ -196,7 +196,13 @@ function getCategoriesFromText(name: string, description: string): string[] {
 }
 
 
-async function fetchGitHubRepo(owner: string, repo: string): Promise<GitHubRepo | null> {
+interface GitHubRepoResult {
+  data: GitHubRepo;
+  canonicalUrl: string; // Actual URL after following redirects
+  wasRedirected: boolean;
+}
+
+async function fetchGitHubRepo(owner: string, repo: string): Promise<GitHubRepoResult | null> {
   try {
     const headers: Record<string, string> = {
       Accept: "application/vnd.github.v3+json",
@@ -219,7 +225,15 @@ async function fetchGitHubRepo(owner: string, repo: string): Promise<GitHubRepo 
       return null;
     }
 
-    return response.json();
+    const data: GitHubRepo = await response.json();
+
+    // Check if repo was renamed/redirected
+    const actualOwner = data.owner.login.toLowerCase();
+    const actualRepo = (data as unknown as { name: string }).name.toLowerCase();
+    const canonicalUrl = `https://github.com/${actualOwner}/${actualRepo}`;
+    const wasRedirected = actualOwner !== owner.toLowerCase() || actualRepo !== repo.toLowerCase();
+
+    return { data, canonicalUrl, wasRedirected };
   } catch {
     return null;
   }
@@ -400,25 +414,45 @@ export async function syncServers(options: SyncOptions = {}): Promise<SyncResult
   let processed = 0;
 
   const processServer = async (mergedServer: MergedServer) => {
-    const { canonicalUrl, githubOwner, githubRepo, name: serverName } = mergedServer;
+    let { canonicalUrl, githubOwner, githubRepo } = mergedServer;
+    const { name: serverName } = mergedServer;
 
     if (!canonicalUrl) return;
-
-    // Use existing slug for updates, generate unique slug for new servers
-    const existingServer = existingByUrl.get(canonicalUrl);
-    const slug = existingServer?.slug ?? generateUniqueSlug(serverName, usedSlugs);
 
     // Fetch GitHub data if we have owner/repo
     let githubData: GitHubRepo | null = null;
     let readmeContent: string | null = null;
 
     if (githubOwner && githubRepo) {
-      const [repoData, readme] = await Promise.all([
+      const [repoResult, readme] = await Promise.all([
         fetchGitHubRepo(githubOwner, githubRepo),
         fetchGitHubReadme(githubOwner, githubRepo),
       ]);
 
-      githubData = repoData;
+      if (repoResult) {
+        githubData = repoResult.data;
+
+        // Handle renamed repos - use canonical URL from GitHub
+        if (repoResult.wasRedirected) {
+          console.log(`  ↪ Redirect: ${canonicalUrl} → ${repoResult.canonicalUrl}`);
+
+          // If the canonical URL already exists, skip this entry (it's a duplicate)
+          if (existingByUrl.has(repoResult.canonicalUrl)) {
+            console.log(`    Skipping duplicate (canonical entry exists)`);
+            result.skipped++;
+            return;
+          }
+
+          // Update to use the correct canonical URL
+          canonicalUrl = repoResult.canonicalUrl;
+          const parsed = parseGitHubUrl(canonicalUrl);
+          if (parsed) {
+            githubOwner = parsed.owner;
+            githubRepo = parsed.repo;
+          }
+        }
+      }
+
       if (readme && githubData) {
         const branch = getDefaultBranch(githubData);
         readmeContent = processReadme(readme, githubOwner, githubRepo, branch);
@@ -426,6 +460,10 @@ export async function syncServers(options: SyncOptions = {}): Promise<SyncResult
 
       await new Promise((r) => setTimeout(r, 50)); // Rate limit
     }
+
+    // Use existing slug for updates, generate unique slug for new servers
+    const existingServer = existingByUrl.get(canonicalUrl);
+    const slug = existingServer?.slug ?? generateUniqueSlug(serverName, usedSlugs);
 
     // Parse with AI if enabled and have README
     let aiData = null;

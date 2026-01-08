@@ -3,7 +3,7 @@ import type { Server, Category, Tag, ServerSource } from "@/lib/db/schema";
 export type { Server, Category, Tag, ServerSource };
 
 // Extended types with relations
-export interface ServerWithRelations extends Omit<Server, 'githubRepoId' | 'npmDownloads' | 'npmQualityScore' | 'discoveredSources' | 'envConfigSchema'> {
+export interface ServerWithRelations extends Omit<Server, 'githubRepoId' | 'npmDownloads' | 'npmQualityScore' | 'discoveredSources' | 'envConfigSchema' | 'glamaSlug' | 'glamaQualityScore' | 'glamaSecurityScore' | 'glamaLicenseScore' | 'supportedPlatforms' | 'glamaEnrichedAt'> {
   categories: string[];
   categoryNames?: string[];
   tags: string[];
@@ -14,6 +14,13 @@ export interface ServerWithRelations extends Omit<Server, 'githubRepoId' | 'npmD
   npmQualityScore?: string | null;
   discoveredSources?: string[] | null;
   envConfigSchema?: Record<string, unknown> | null;
+  // Glama enrichment fields
+  glamaSlug?: string | null;
+  glamaQualityScore?: number | null;
+  glamaSecurityScore?: number | null;
+  glamaLicenseScore?: number | null;
+  supportedPlatforms?: string[] | null;
+  glamaEnrichedAt?: Date | null;
 }
 
 // API response types
