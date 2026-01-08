@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import {
@@ -18,10 +19,41 @@ import { getCategoryBySlug, getServersByCategory } from "@/lib/db/queries";
 import { ServerCard } from "@/components/server-card";
 import { Button } from "@/components/ui/button";
 import { GradientText } from "@/components/ui/gradient-text";
+import { SITE_URL } from "@/lib/seo";
 
 interface Props {
   params: Promise<{ slug: string }>;
   searchParams: Promise<{ page?: string }>;
+}
+
+export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const { page: pageParam } = await searchParams;
+  const page = parseInt(pageParam || "1", 10);
+
+  const category = await getCategoryBySlug(slug);
+  if (!category) {
+    return { title: "Category Not Found", robots: { index: false } };
+  }
+
+  const { total } = await getServersByCategory(slug, 1, 1);
+
+  let title = `${category.name} MCP Servers`;
+  const description = category.description
+    ? `${category.description} Browse ${total} MCP servers in this category.`
+    : `Explore ${total} MCP servers in the ${category.name} category.`;
+
+  if (page > 1) {
+    title = `${title} — Page ${page}`;
+  }
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: `${SITE_URL}/categories/${slug}${page > 1 ? `?page=${page}` : ""}`,
+    },
+  };
 }
 
 const PAGE_SIZE = 30;

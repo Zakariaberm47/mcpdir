@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -21,6 +22,25 @@ import { SearchCommand } from "@/components/search-command";
 import { HeroBackground, GridPattern, FloatingIcons } from "@/components/hero-background";
 import { AnimatedCounter } from "@/components/animated-counter";
 import { getServers, getCategories, getStats } from "@/lib/db/queries";
+import { SITE_CONFIG, SITE_URL } from "@/lib/seo";
+
+export const metadata: Metadata = {
+  title: `${SITE_CONFIG.name} — Discover MCP Servers for AI Development`,
+  description:
+    "Explore 2000+ Model Context Protocol (MCP) servers. Find AI integrations for databases, APIs, file systems, and developer tools. The npm for AI.",
+  keywords: [
+    "MCP servers",
+    "Model Context Protocol",
+    "AI tools directory",
+    "Claude integrations",
+    "LLM tools",
+    "AI development",
+    "MCP registry",
+  ],
+  alternates: {
+    canonical: SITE_URL,
+  },
+};
 
 const CATEGORY_ICONS: Record<string, React.ElementType> = {
   databases: Database,
@@ -84,7 +104,7 @@ export default async function HomePage() {
             <div className="max-w-2xl mx-auto mb-10 animate-fade-in [animation-delay:300ms] relative z-50">
               <div className="glass rounded-2xl p-1.5">
                 <SearchCommand
-                  placeholder="Search 1000+ MCP servers..."
+                  placeholder="Search 2000+ MCP servers..."
                   className="[&_input]:bg-background/50 [&_input]:border-0 [&_input]:h-14 [&_input]:text-lg [&_input]:rounded-xl"
                 />
               </div>
@@ -275,7 +295,7 @@ export default async function HomePage() {
                 </div>
                 <h3 className="text-lg font-semibold mb-3">Community Ecosystem</h3>
                 <p className="text-sm text-muted-foreground">
-                  1000+ community-built servers ready to use in your projects
+                  2000+ community-built servers ready to use in your projects
                 </p>
               </GlassCardContent>
             </GlassCard>

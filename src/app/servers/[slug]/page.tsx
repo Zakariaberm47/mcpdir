@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import {
@@ -27,9 +28,64 @@ import { ToolsList } from "@/components/tools-list";
 import { MarkdownContent } from "@/components/markdown-content";
 import { SourceBadges } from "@/components/source-badges";
 import { HelpValidateForm } from "@/components/help-validate-form";
+import { SITE_URL, generateServerSchema, generateBreadcrumbSchema } from "@/lib/seo";
 
 interface Props {
   params: Promise<{ slug: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const server = await getServerBySlug(slug);
+
+  if (!server) {
+    return {
+      title: "Server Not Found",
+      robots: { index: false },
+    };
+  }
+
+  const description = server.description
+    ? `${server.description.slice(0, 155)}${server.description.length > 155 ? "..." : ""}`
+    : `${server.name} is an MCP server for AI integrations. ${(server.tools as { name: string }[])?.length || 0} tools available.`;
+
+  const tools = (server.tools as { name: string }[]) || [];
+  const keywords = [
+    server.name,
+    "MCP server",
+    "Model Context Protocol",
+    ...tools.slice(0, 5).map((t) => t.name),
+    ...(server.categoryNames || []),
+  ];
+
+  return {
+    title: `${server.name} — MCP Server`,
+    description,
+    keywords,
+    alternates: {
+      canonical: `${SITE_URL}/servers/${slug}`,
+    },
+    openGraph: {
+      type: "article",
+      title: `${server.name} — MCP Server`,
+      description,
+      url: `${SITE_URL}/servers/${slug}`,
+      images: [
+        {
+          url: `${SITE_URL}/og/servers/${slug}`,
+          width: 1200,
+          height: 630,
+          alt: `${server.name} — MCP Server`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${server.name} — MCP Server`,
+      description,
+      images: [`${SITE_URL}/og/servers/${slug}`],
+    },
+  };
 }
 
 export default async function ServerDetailPage({ params }: Props) {
@@ -60,20 +116,45 @@ export default async function ServerDetailPage({ params }: Props) {
     });
   };
 
+  const serverSchema = generateServerSchema({
+    name: server.name,
+    slug: server.slug,
+    description: server.description,
+    sourceUrl: server.sourceUrl,
+    homepageUrl: server.homepageUrl,
+    starsCount: server.starsCount,
+    latestVersion: server.latestVersion,
+    tools: tools,
+    updatedAt: server.updatedAt,
+  });
+
+  const breadcrumbSchema = generateBreadcrumbSchema([
+    { name: "Home", url: SITE_URL },
+    { name: "Servers", url: `${SITE_URL}/servers` },
+    { name: server.name, url: `${SITE_URL}/servers/${server.slug}` },
+  ]);
+
   return (
-    <div className="min-h-screen">
-      {/* Header with gradient */}
-      <div className="relative overflow-hidden border-b border-[var(--glass-border)]">
-        <div className="absolute inset-0 bg-gradient-to-b from-cyan/5 via-purple/3 to-transparent" />
-        <div className="container mx-auto px-4 py-8 relative z-10">
-          {/* Breadcrumb */}
-          <Link
-            href="/servers"
-            className="inline-flex items-center text-sm text-muted-foreground hover:text-cyan transition-colors mb-6"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to servers
-          </Link>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([serverSchema, breadcrumbSchema]),
+        }}
+      />
+      <div className="min-h-screen">
+        {/* Header with gradient */}
+        <div className="relative overflow-hidden border-b border-[var(--glass-border)]">
+          <div className="absolute inset-0 bg-gradient-to-b from-cyan/5 via-purple/3 to-transparent" />
+          <div className="container mx-auto px-4 py-8 relative z-10">
+            {/* Breadcrumb */}
+            <Link
+              href="/servers"
+              className="inline-flex items-center text-sm text-muted-foreground hover:text-cyan transition-colors mb-6"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to servers
+            </Link>
 
           {/* Server header */}
           <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
@@ -407,6 +488,7 @@ export default async function ServerDetailPage({ params }: Props) {
           </TabsContent>
         </Tabs>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

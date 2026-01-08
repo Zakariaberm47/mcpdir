@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -9,6 +10,7 @@ import { NoResultsState } from "@/components/no-results-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { GradientText } from "@/components/ui/gradient-text";
+import { SITE_URL } from "@/lib/seo";
 
 interface Props {
   searchParams: Promise<{
@@ -18,6 +20,38 @@ interface Props {
     sort?: string;
     page?: string;
   }>;
+}
+
+export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+  const params = await searchParams;
+  const query = params.q;
+  const category = params.category;
+  const page = parseInt(params.page || "1", 10);
+
+  let title = "Browse All MCP Servers";
+  let description =
+    "Explore the complete directory of Model Context Protocol servers. Find AI integrations for databases, APIs, file systems, and developer tools.";
+
+  if (query) {
+    title = `Search: "${query}" — MCP Servers`;
+    description = `Search results for "${query}" in the MCP server directory.`;
+  } else if (category) {
+    title = `${category} MCP Servers`;
+    description = `Browse MCP servers in the ${category} category.`;
+  }
+
+  if (page > 1) {
+    title = `${title} — Page ${page}`;
+  }
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: `${SITE_URL}/servers${page > 1 ? `?page=${page}` : ""}`,
+    },
+    robots: query ? { index: false, follow: true } : undefined,
+  };
 }
 
 export default async function ServersPage({ searchParams }: Props) {

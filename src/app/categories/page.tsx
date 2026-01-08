@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import {
   Package,
@@ -14,6 +15,17 @@ import {
 import { getCategories } from "@/lib/db/queries";
 import { GlassCard, GlassCardContent } from "@/components/ui/glass-card";
 import { GradientText } from "@/components/ui/gradient-text";
+import { SITE_URL } from "@/lib/seo";
+
+export const metadata: Metadata = {
+  title: "MCP Server Categories — Browse by Type",
+  description:
+    "Explore MCP servers organized by category. Find servers for databases, file systems, APIs, AI/ML, developer tools, and more.",
+  keywords: ["MCP categories", "AI server types", "MCP server directory", "AI integrations by category"],
+  alternates: {
+    canonical: `${SITE_URL}/categories`,
+  },
+};
 
 const CATEGORY_ICONS: Record<string, React.ElementType> = {
   databases: Database,
