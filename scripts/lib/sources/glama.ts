@@ -38,6 +38,8 @@ export class GlamaSource extends SyncSource {
     const seenUrls = new Set<string>();
     let cursor: string | undefined;
     let totalFetched = 0;
+    let consecutiveErrors = 0;
+    const MAX_CONSECUTIVE_ERRORS = 3;
 
     while (true) {
       const url = cursor
@@ -49,7 +51,31 @@ export class GlamaSource extends SyncSource {
         throw new Error(`Glama API error: ${response.status}`);
       }
 
-      const data: GlamaResponse = await response.json();
+      // Glama API sometimes returns invalid JSON (unescaped backslashes)
+      // Try to parse and skip pages with errors
+      let data: GlamaResponse;
+      const text = await response.text();
+      try {
+        data = JSON.parse(text);
+        consecutiveErrors = 0;
+      } catch {
+        console.warn(`  glama: skipping page with invalid JSON (cursor: ${cursor?.slice(0, 20)}...)`);
+        consecutiveErrors++;
+
+        if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
+          console.warn(`  glama: too many consecutive errors, stopping`);
+          return;
+        }
+
+        // Try to extract cursor from malformed response to continue
+        const cursorMatch = text.match(/"endCursor"\s*:\s*"([^"]+)"/);
+        if (cursorMatch) {
+          cursor = cursorMatch[1];
+          await delay(100);
+          continue;
+        }
+        return;
+      }
       const servers: DiscoveredServer[] = [];
       let filtered = 0;
 
