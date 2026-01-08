@@ -21,8 +21,7 @@ const SORT_OPTIONS = [
 const TAG_OPTIONS = [
   { value: "official", label: "Official" },
   { value: "community", label: "Community" },
-  { value: "typescript", label: "TypeScript" },
-  { value: "python", label: "Python" },
+  { value: "verified", label: "Verified" },
 ] as const;
 
 export function FilterBar({ categories }: FilterBarProps) {
