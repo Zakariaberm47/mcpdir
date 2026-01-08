@@ -1,0 +1,64 @@
+name: Sync MCP Servers
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # Every 6 hours
+  workflow_dispatch:
+    inputs:
+      sources:
+        description: 'Sources to sync'
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - mcp-registry
+          - npm
+          - github
+      force:
+        description: 'Force refresh all servers'
+        default: false
+        type: boolean
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Sync servers
+        run: |
+          SOURCES="${{ inputs.sources || 'all' }}"
+          if [ "${{ inputs.force }}" = "true" ]; then
+            FORCE_REFRESH=true pnpm tsx scripts/sync-servers.ts --sources=$SOURCES --force
+          else
+            pnpm tsx scripts/sync-servers.ts --sources=$SOURCES
+          fi
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Sync Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- Sources: ${{ inputs.sources || 'all' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Force refresh: ${{ inputs.force || 'false' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Triggered by: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
