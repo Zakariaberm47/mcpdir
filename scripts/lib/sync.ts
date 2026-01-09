@@ -424,7 +424,15 @@ export async function syncServers(options: SyncOptions = {}): Promise<SyncResult
     let readmeContent: string | null = null;
 
     // Check if source already provided README (e.g., for monorepo subdirectories)
-    const sourceReadme = (mergedServer.sourceData as { readmeContent?: string })?.readmeContent;
+    // sourceData is keyed by source type, so we need to check all sources
+    let sourceReadme: string | undefined;
+    for (const sourceType of Object.keys(mergedServer.sourceData)) {
+      const data = mergedServer.sourceData[sourceType as SourceType] as { readmeContent?: string };
+      if (data?.readmeContent) {
+        sourceReadme = data.readmeContent;
+        break;
+      }
+    }
 
     if (githubOwner && githubRepo) {
       // For monorepo subdirectories, skip fetching repo data/readme (use source-provided data)
