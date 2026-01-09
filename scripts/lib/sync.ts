@@ -423,42 +423,53 @@ export async function syncServers(options: SyncOptions = {}): Promise<SyncResult
     let githubData: GitHubRepo | null = null;
     let readmeContent: string | null = null;
 
+    // Check if source already provided README (e.g., for monorepo subdirectories)
+    const sourceReadme = (mergedServer.sourceData as { readmeContent?: string })?.readmeContent;
+
     if (githubOwner && githubRepo) {
-      const [repoResult, readme] = await Promise.all([
-        fetchGitHubRepo(githubOwner, githubRepo),
-        fetchGitHubReadme(githubOwner, githubRepo),
-      ]);
+      // For monorepo subdirectories, skip fetching repo data/readme (use source-provided data)
+      const isMonorepoSubdir = canonicalUrl.includes('/tree/main/');
 
-      if (repoResult) {
-        githubData = repoResult.data;
+      if (isMonorepoSubdir) {
+        // Use source-provided README for monorepo subdirectories
+        readmeContent = sourceReadme || null;
+      } else {
+        const [repoResult, readme] = await Promise.all([
+          fetchGitHubRepo(githubOwner, githubRepo),
+          fetchGitHubReadme(githubOwner, githubRepo),
+        ]);
 
-        // Handle renamed repos - use canonical URL from GitHub
-        if (repoResult.wasRedirected) {
-          console.log(`  ↪ Redirect: ${canonicalUrl} → ${repoResult.canonicalUrl}`);
+        if (repoResult) {
+          githubData = repoResult.data;
 
-          // If the canonical URL already exists, skip this entry (it's a duplicate)
-          if (existingByUrl.has(repoResult.canonicalUrl)) {
-            console.log(`    Skipping duplicate (canonical entry exists)`);
-            result.skipped++;
-            return;
-          }
+          // Handle renamed repos - use canonical URL from GitHub
+          if (repoResult.wasRedirected) {
+            console.log(`  ↪ Redirect: ${canonicalUrl} → ${repoResult.canonicalUrl}`);
 
-          // Update to use the correct canonical URL
-          canonicalUrl = repoResult.canonicalUrl;
-          const parsed = parseGitHubUrl(canonicalUrl);
-          if (parsed) {
-            githubOwner = parsed.owner;
-            githubRepo = parsed.repo;
+            // If the canonical URL already exists, skip this entry (it's a duplicate)
+            if (existingByUrl.has(repoResult.canonicalUrl)) {
+              console.log(`    Skipping duplicate (canonical entry exists)`);
+              result.skipped++;
+              return;
+            }
+
+            // Update to use the correct canonical URL
+            canonicalUrl = repoResult.canonicalUrl;
+            const parsed = parseGitHubUrl(canonicalUrl);
+            if (parsed) {
+              githubOwner = parsed.owner;
+              githubRepo = parsed.repo;
+            }
           }
         }
-      }
 
-      if (readme && githubData) {
-        const branch = getDefaultBranch(githubData);
-        readmeContent = processReadme(readme, githubOwner, githubRepo, branch);
-      }
+        if (readme && githubData) {
+          const branch = getDefaultBranch(githubData);
+          readmeContent = processReadme(readme, githubOwner, githubRepo, branch);
+        }
 
-      await new Promise((r) => setTimeout(r, 50)); // Rate limit
+        await new Promise((r) => setTimeout(r, 50)); // Rate limit
+      }
     }
 
     // Use existing slug for updates, generate unique slug for new servers
