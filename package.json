@@ -37,6 +37,7 @@
     "@radix-ui/react-tabs": "^1.1.13",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
     "drizzle-orm": "^0.45.1",
     "jsonrepair": "^3.13.1",
     "lucide-react": "^0.562.0",

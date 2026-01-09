@@ -75,7 +75,7 @@ export async function GET() {
             maxWidth: 800,
           }}
         >
-          The registry for Model Context Protocol servers
+          The largest open MCP server directory
         </div>
         <div
           style={{
@@ -89,9 +89,9 @@ export async function GET() {
         >
           <span>8,000+ Servers</span>
           <span style={{ color: "#06b6d4" }}>•</span>
-          <span>AI Integrations</span>
+          <span>Community-Driven</span>
           <span style={{ color: "#a855f7" }}>•</span>
-          <span>Open Source</span>
+          <span>100% Open</span>
         </div>
       </div>
     ),

@@ -3,6 +3,7 @@ import { Star, Wrench, CheckCircle, ShieldCheck, ArrowUpRight, Settings, XCircle
 import { GlassCard, GlassCardContent, GlassCardHeader, GlassCardTitle } from "@/components/ui/glass-card";
 import { Badge } from "@/components/ui/badge";
 import { SourceBadges } from "./source-badges";
+import { RatingDisplay } from "@/components/reviews";
 import type { ServerWithRelations } from "@/types";
 
 interface ServerCardProps {
@@ -87,6 +88,12 @@ export function ServerCard({ server, featured = false }: ServerCardProps) {
                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
                   <Wrench className="h-3 w-3" />
                   <span>{tools.length} {tools.length === 1 ? "tool" : "tools"}</span>
+                </div>
+              )}
+              {(server.reviewsCount ?? 0) > 0 && server.averageRating && (
+                <div className="flex items-center gap-1">
+                  <RatingDisplay rating={Number(server.averageRating)} size="sm" />
+                  <span className="text-xs text-muted-foreground">({server.reviewsCount})</span>
                 </div>
               )}
             </div>

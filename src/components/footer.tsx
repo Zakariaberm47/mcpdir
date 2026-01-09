@@ -17,7 +17,7 @@ export function Footer() {
             <div>
               <p className="text-sm font-medium">MCP Hub</p>
               <p className="text-xs text-muted-foreground">
-                The definitive MCP server directory
+                The largest open MCP directory
               </p>
             </div>
           </div>
@@ -47,11 +47,10 @@ export function Footer() {
 
         {/* Bottom bar */}
         <div className="mt-6 pt-6 border-t border-[var(--glass-border)] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
-          <p>Built for the AI developer community</p>
+          <p>Open-source, built by the community</p>
           <p className="flex items-center gap-1">
-            Indexing
             <span className="text-cyan font-medium">8,000+</span>
-            MCP servers worldwide
+            open MCP servers indexed
           </p>
         </div>
       </div>

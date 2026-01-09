@@ -28,6 +28,7 @@ import { ToolsList } from "@/components/tools-list";
 import { MarkdownContent } from "@/components/markdown-content";
 import { SourceBadges } from "@/components/source-badges";
 import { HelpValidateForm } from "@/components/help-validate-form";
+import { ServerReviews } from "@/components/reviews";
 import { SITE_URL, generateServerSchema, generateBreadcrumbSchema } from "@/lib/seo";
 
 interface Props {
@@ -488,6 +489,16 @@ export default async function ServerDetailPage({ params }: Props) {
             )}
           </TabsContent>
         </Tabs>
+
+        {/* Reviews Section */}
+        <div className="mt-12">
+          <ServerReviews
+            serverId={server.id}
+            serverSlug={server.slug}
+            averageRating={server.averageRating}
+            reviewsCount={server.reviewsCount}
+          />
+        </div>
       </div>
       </div>
     </>

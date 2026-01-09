@@ -2,9 +2,9 @@ export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://mcpdir.dev"
 
 export const SITE_CONFIG = {
   name: "MCP Hub",
-  tagline: "The registry for Model Context Protocol servers",
+  tagline: "The largest open MCP server directory",
   description:
-    "Discover and explore MCP servers. The npm/Docker Hub for Model Context Protocol — find AI integrations for databases, APIs, file systems, and dev tools.",
+    "The largest open-source directory of 8000+ MCP servers. Community-driven registry for Model Context Protocol — find AI integrations for databases, APIs, and dev tools.",
   url: SITE_URL,
   twitterHandle: "@mcphub",
   locale: "en_US",
@@ -17,6 +17,8 @@ export const KEYWORDS = {
     "MCP",
     "Model Context Protocol",
     "MCP servers",
+    "MCP directory",
+    "open source MCP",
     "AI integrations",
     "LLM tools",
     "Claude tools",

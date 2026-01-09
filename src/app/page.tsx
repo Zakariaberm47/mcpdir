@@ -26,17 +26,19 @@ import { getServers, getCategories, getStats } from "@/lib/db/queries";
 import { SITE_CONFIG, SITE_URL } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: `${SITE_CONFIG.name} — Discover MCP Servers for AI Development`,
+  title: `${SITE_CONFIG.name} — The Largest Open MCP Server Directory`,
   description:
-    "Explore 8000+ Model Context Protocol (MCP) servers. Find AI integrations for databases, APIs, file systems, and developer tools. The npm for AI.",
+    "The largest open-source directory of 8000+ MCP servers. Community-driven, fully searchable. Find AI integrations for databases, APIs, file systems, and developer tools.",
   keywords: [
     "MCP servers",
     "Model Context Protocol",
+    "open source MCP directory",
     "AI tools directory",
     "Claude integrations",
     "LLM tools",
     "AI development",
     "MCP registry",
+    "community MCP servers",
   ],
   alternates: {
     canonical: SITE_URL,
@@ -81,7 +83,7 @@ export default async function HomePage() {
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-8 animate-fade-in">
               <Sparkles className="h-4 w-4 text-cyan" />
-              <span className="text-sm">The definitive MCP directory</span>
+              <span className="text-sm">The largest open MCP directory</span>
             </div>
 
             {/* Headline */}
@@ -95,9 +97,9 @@ export default async function HomePage() {
             </GradientHeading>
 
             <p className="text-xl md:text-2xl text-muted-foreground mb-10 max-w-2xl mx-auto animate-fade-in [animation-delay:200ms]">
-              Explore the ecosystem of Model Context Protocol servers.
+              Open-source, community-driven directory of MCP servers.
               <span className="block mt-2 text-lg">
-                The npm for AI integrations.
+                8,000+ integrations. Zero vendor lock-in.
               </span>
             </p>
 
@@ -303,9 +305,9 @@ export default async function HomePage() {
                 <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple/20 to-purple/5 flex items-center justify-center mx-auto mb-6">
                   <Box className="h-7 w-7 text-purple" />
                 </div>
-                <h3 className="text-lg font-semibold mb-3">Community Ecosystem</h3>
+                <h3 className="text-lg font-semibold mb-3">Open & Community-Driven</h3>
                 <p className="text-sm text-muted-foreground">
-                  8000+ community-built servers ready to use in your projects
+                  8000+ servers from the community. No walled gardens, no gatekeeping.
                 </p>
               </GlassCardContent>
             </GlassCard>
