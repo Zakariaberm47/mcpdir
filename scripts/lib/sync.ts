@@ -1,6 +1,6 @@
 import { neon } from "@neondatabase/serverless";
 import { drizzle, NeonHttpDatabase } from "drizzle-orm/neon-http";
-import { eq, inArray, and } from "drizzle-orm";
+import { eq, inArray, and, sql } from "drizzle-orm";
 import pLimit from "p-limit";
 import {
   servers,
@@ -347,13 +347,14 @@ export async function syncServers(options: SyncOptions = {}): Promise<SyncResult
   console.log(`After deduplication: ${merged.length} unique servers\n`);
 
   // Get existing servers for comparison
+  // Note: We use hasReadme boolean instead of full content to avoid exceeding Neon's 64MB response limit
   const existingServers = await getDb()
     .select({
       id: servers.id,
       slug: servers.slug,
       sourceUrl: servers.sourceUrl,
       contentHash: servers.contentHash,
-      readmeContent: servers.readmeContent,
+      hasReadme: sql<boolean>`readme_content IS NOT NULL`,
       tools: servers.tools,
     })
     .from(servers);
@@ -363,7 +364,7 @@ export async function syncServers(options: SyncOptions = {}): Promise<SyncResult
   // For retry mode, get URLs of servers that have README but empty tools
   const aiFailedUrls = new Set(
     existingServers
-      .filter((s) => s.readmeContent && (!s.tools || (Array.isArray(s.tools) && s.tools.length === 0)))
+      .filter((s) => s.hasReadme && (!s.tools || (Array.isArray(s.tools) && s.tools.length === 0)))
       .map((s) => s.sourceUrl)
   );
 
