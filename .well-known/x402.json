@@ -1,0 +1,12 @@
+{
+  "name": "Zakariaberm47/mcpdir",
+  "description": "🌐 Discover and explore 8,000+ community-driven MCP servers with MCP Hub—an open-source, fully searchable server directory.",
+  "accepts": [
+    {
+      "network": "eip155:8453",
+      "asset": "USDC",
+      "address": "YOUR_WALLET_ADDRESS"
+    }
+  ],
+  "resources": []
+}
